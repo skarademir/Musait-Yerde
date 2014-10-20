@@ -4,6 +4,11 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
+		<key>GeliyorGidiyor.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>1</integer>
+		</dict>
 		<key>Musait Yerde.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
@@ -18,6 +23,11 @@
 			<true/>
 		</dict>
 		<key>6F47FAF419E1D2800010C855</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>6F47FB0819E1D52A0010C855</key>
 		<dict>
 			<key>primary</key>
 			<true/>
