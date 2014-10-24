@@ -85,7 +85,7 @@ class TodayViewController: UIViewController, CLLocationManagerDelegate, NCWidget
                     //Display arrival time in 12:00 AM format
                     let arrival = NSDate(timeIntervalSince1970: busPredictedArrivalEpochTime)
                     let hhmmFormatter = NSDateFormatter()
-                    hhmmFormatter.dateFormat = "hh:mm a"
+                    hhmmFormatter.dateFormat = "h:mm a"
                     self.Fav_ArrivalTime.text = hhmmFormatter.stringFromDate(arrival)
                 }
         }
@@ -194,7 +194,7 @@ class TodayViewController: UIViewController, CLLocationManagerDelegate, NCWidget
                                 //Display arrival time in 12:00 AM format
                                 let arrival = NSDate(timeIntervalSince1970: busPredictedArrivalEpochTime)
                                 let hhmmFormatter = NSDateFormatter()
-                                hhmmFormatter.dateFormat = "hh:mm a"
+                                hhmmFormatter.dateFormat = "h:mm a"
                                 self.NearbyOne_ArrivalTime.text = hhmmFormatter.stringFromDate(arrival)
                             }
                     }
@@ -243,7 +243,7 @@ class TodayViewController: UIViewController, CLLocationManagerDelegate, NCWidget
                                         //Display arrival time in 12:00 AM format
                                         let arrival = NSDate(timeIntervalSince1970: busPredictedArrivalEpochTime)
                                         let hhmmFormatter = NSDateFormatter()
-                                        hhmmFormatter.dateFormat = "hh:mm a"
+                                        hhmmFormatter.dateFormat = "h:mm a"
                                         self.NearbyTwo_ArrivalTime.text = hhmmFormatter.stringFromDate(arrival)
                                     }
 
@@ -298,7 +298,7 @@ class TodayViewController: UIViewController, CLLocationManagerDelegate, NCWidget
                                 //Display arrival time in 12:00 AM format
                                 let arrival = NSDate(timeIntervalSince1970: busPredictedArrivalEpochTime)
                                 let hhmmFormatter = NSDateFormatter()
-                                hhmmFormatter.dateFormat = "hh:mm a"
+                                hhmmFormatter.dateFormat = "h:mm a"
                                 self.NearbyOne_ArrivalTime.text = hhmmFormatter.stringFromDate(arrival)
                                 //TODO oh god im so sorry this is the worst
                                 stop0_buses.removeAtIndex(i)
