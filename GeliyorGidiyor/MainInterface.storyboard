@@ -90,7 +90,7 @@
                                     </mask>
                                 </variation>
                             </view>
-                            <view clipsSubviews="YES" tag="1" contentMode="top" horizontalCompressionResistancePriority="1000" verticalCompressionResistancePriority="250" simulatedAppContext="notificationCenter" translatesAutoresizingMaskIntoConstraints="NO" id="VVa-W6-1sN" userLabel="NewRouteTwo">
+                            <view clipsSubviews="YES" tag="1" contentMode="top" horizontalCompressionResistancePriority="1000" verticalCompressionResistancePriority="250" simulatedAppContext="notificationCenter" translatesAutoresizingMaskIntoConstraints="NO" id="VVa-W6-1sN" userLabel="NearRouteTwo">
                                 <rect key="frame" x="0.0" y="105" width="600" height="70"/>
                                 <subviews>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Route" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="RmL-TU-1hX">
@@ -457,6 +457,17 @@
                     <simulatedOrientationMetrics key="simulatedOrientationMetrics"/>
                     <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
                     <size key="freeformSize" width="600" height="280"/>
+                    <connections>
+                        <outlet property="Fav_ArrivalTime" destination="6K9-tc-E8z" id="8Nr-cr-hdl"/>
+                        <outlet property="Fav_Minutes" destination="POC-7T-vTc" id="plw-fd-ido"/>
+                        <outlet property="Fav_RouteNum" destination="tAD-V3-xmt" id="e0Q-UB-7J9"/>
+                        <outlet property="NearbyOne_ArrivalTime" destination="r1l-fY-DYG" id="hrr-kv-0SF"/>
+                        <outlet property="NearbyOne_Minutes" destination="f7n-Rj-fEL" id="Ubr-Ca-5yQ"/>
+                        <outlet property="NearbyOne_RouteNum" destination="SC0-aN-7MX" id="VE0-Dt-7gm"/>
+                        <outlet property="NearbyTwo_ArrivalTime" destination="DsW-Cb-DWV" id="eyi-F9-S7J"/>
+                        <outlet property="NearbyTwo_Minutes" destination="Sot-jg-nhI" id="90g-eb-9bk"/>
+                        <outlet property="NearbyTwo_RouteNum" destination="dDE-vk-ffa" id="Nv7-FU-ja9"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="vXp-U4-Rya" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
