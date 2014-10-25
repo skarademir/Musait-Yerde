@@ -50,9 +50,9 @@ class TodayViewController: UIViewController, CLLocationManagerDelegate, NCWidget
                 } else {
                     responseJSON = SwiftyJSON.JSON.nullJSON
                 }
-                println("\(responseJSON)")
+                //println("\(responseJSON)")
                 let favstop_buses: Array<JSON> = responseJSON["data"]["entry"]["arrivalsAndDepartures"].arrayValue
-                println("\(favstop_buses)")
+                //println("\(favstop_buses)")
                 if favstop_buses.count > 0 {
                     //we pick the first bus that is predicted to arrive AFTER current time
                     //yes this is ghetto TODO
@@ -139,13 +139,14 @@ class TodayViewController: UIViewController, CLLocationManagerDelegate, NCWidget
                     responseJSON = SwiftyJSON.JSON.nullJSON
                     //println("nullJSONelse")
                 }
-                  //println("\(responseJSON)")
+                
+                //println("\(responseJSON)")
                 
                 let stops: Array<JSON> = responseJSON["data"]["list"].arrayValue
                 
                 //println("stops count = \(stops.count)")
                 switch stops.count {
-                case 2:
+                case 2...Int.max:
                     //println("Case 2")
                     let stop0_id: SwiftyJSON.JSON = stops[0]["id"]
                     let stop1_id: SwiftyJSON.JSON = stops[1]["id"]
@@ -267,7 +268,7 @@ class TodayViewController: UIViewController, CLLocationManagerDelegate, NCWidget
                             //println("\(responseJSON)")
                             var stop0_buses: Array<JSON> = responseJSON["data"]["entry"]["arrivalsAndDepartures"].arrayValue
                             switch stop0_buses.count {
-                            case 1...stop0_buses.count-1:
+                            case 1...Int.max:
                                 //we pick the first bus that is predicted to arrive AFTER current time
                                 //yes this is ghetto TODO
                                 var i: Int = 0
