@@ -11,11 +11,16 @@ What I am apologizing for:
 * Hardcoded Favorite Stop
 * Unpublishable (Apple requires a functional Host App)
 
+##Installation
+After checking out the repo, use the terminal to travel to the folder where the Musait yerde.xproj resides. Type:
+>git submodule sync
+>git submodule update
+
 Everything about this project is embarrassing and the hope of placing it in public view is to force myself to improve it.
 
 The extension is currently only semi-useful. At best.
 ##Favorite Stop (half-baked)
-This section displays the next bus arriving at a user-specified stop. The user will be able to specify their favorite stop through a map interface in the main app. It is currently hardcoded for the stop I wanted to use this extension for. (Which pretty much gives away a large part of my identity right here) 
+This section displays the next bus arriving at a user-specified stop and route. The user will be able to specify their favorite stop+route through a map interface in the main app. It is currently hardcoded for the stop I wanted to use this extension for. (Which pretty much gives away a large part of my identity right here) 
 ##Nearby Buses
 This section will tell you the next bus for the nearest two stops. If it can't find two stops (a scenario I handle, despite there being no evidence of such a situation occuring) it will display the next two buses. It seems the onebusaway api can return buses that have already arrived (their estimatedArrivalTime is earlier than the current Time). I have done some inexplicably unforgivable things to skip over those buses. Instead of sorting or removing the offending elements I rip out the bus I have already displayed. This is disgusting. ~God~ Woz forgive me.
 
