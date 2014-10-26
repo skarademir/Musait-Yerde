@@ -14,6 +14,7 @@ What I am apologizing for:
 ##Installation
 After checking out the repo, use the terminal to travel to the folder where the Musait yerde.xproj resides. Type:
 >git submodule sync
+
 >git submodule update
 
 Everything about this project is embarrassing and the hope of placing it in public view is to force myself to improve it.
