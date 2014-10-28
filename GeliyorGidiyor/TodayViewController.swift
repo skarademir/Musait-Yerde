@@ -36,10 +36,13 @@ class TodayViewController: UIViewController, CLLocationManagerDelegate, NCWidget
         locationManager.desiredAccuracy = kCLLocationAccuracyBestForNavigation
         locationManager.requestWhenInUseAuthorization()
         locationManager.pausesLocationUpdatesAutomatically = true
+        updateFavStop("1_13460",favRouteId: "40_100236")
+        
+        
         locationManager.startUpdatingLocation()
         
     }
-    func updateFavStop(favStopId: String ) {
+    func updateFavStop(favStopId: String , favRouteId: String) {
         Alamofire.request(.GET, "http://api.pugetsound.onebusaway.org/api/where/arrivals-and-departures-for-stop/\(favStopId).json?key=org.onebusaway.iphone&version=2")
             .responseJSON { (_, _, data, error) in
                 var responseJSON: SwiftyJSON.JSON
@@ -51,30 +54,25 @@ class TodayViewController: UIViewController, CLLocationManagerDelegate, NCWidget
                     responseJSON = SwiftyJSON.JSON.nullJSON
                 }
                 //println("\(responseJSON)")
-                let favstop_buses: Array<JSON> = responseJSON["data"]["entry"]["arrivalsAndDepartures"].arrayValue
+                var favstop_buses: Array<JSON> = responseJSON["data"]["entry"]["arrivalsAndDepartures"].arrayValue
                 //println("\(favstop_buses)")
+                
+                let currentTime: Int = responseJSON["currentTime"].intValue
+                favstop_buses.sort({$0["predictedArrivalTime"].intValue > $1["predictedArrivalTime"].intValue})
+                favstop_buses = favstop_buses.filter({
+                    var didntArriveYet: Bool = $0["predictedArrivalTime"].intValue > currentTime;
+                    var onFavRoute: Bool = $0["routeId"].stringValue == favRouteId;
+                    println ("\(didntArriveYet && onFavRoute)");
+                    return didntArriveYet && onFavRoute })
+                
                 if favstop_buses.count > 0 {
-                    //we pick the first bus that is predicted to arrive AFTER current time
-                    //yes this is ghetto TODO
-                    var i: Int = 0
-                    let currentTime: Int = responseJSON["currentTime"].intValue
-                    var i_arrival: Int = favstop_buses[i]["predictedArrivalTime"].intValue
-                    while  i_arrival < currentTime {
-                        i = i+1
-                        if i == favstop_buses.count {
-                            return
-                        }
-                        i_arrival = favstop_buses[i]["predictedArrivalTime"].intValue
-                    }
-                    
-                    
                     //Build the RouteNum by combining Bus Number and Bus Compass direction)
-                    let busNum = favstop_buses[i]["routeShortName"]
+                    let busNum = favstop_buses[0]["routeShortName"]
                     let busDirection = responseJSON["data"]["references"]["stops"][0]["direction"]
                     self.Fav_RouteNum.text = "\(busNum)\(busDirection)"
                     
                     //Json provides epoch time in milliseconds were converting to seconds.
-                    let busPredictedArrivalEpochTime = favstop_buses[i]["predictedArrivalTime"].doubleValue/1000
+                    let busPredictedArrivalEpochTime = favstop_buses[0]["predictedArrivalTime"].doubleValue/1000
                     let now = NSDate()
                     
                     //Display Minutes to bus arrival
@@ -97,7 +95,6 @@ class TodayViewController: UIViewController, CLLocationManagerDelegate, NCWidget
     
     func widgetPerformUpdateWithCompletionHandler(completionHandler: ((NCUpdateResult) -> Void)!) {
         // Perform any setup necessary in order to update the view.
-        updateFavStop("1_13460")
         //TODO~~this grabs the Favorite Bus route from the Parent App~~
         //let sharedDefaults = NSUserDefaults(suiteName: “group.YOURGROUPHERE”)
         
@@ -144,13 +141,13 @@ class TodayViewController: UIViewController, CLLocationManagerDelegate, NCWidget
                 
                 let stops: Array<JSON> = responseJSON["data"]["list"].arrayValue
                 
-                //println("stops count = \(stops.count)")
+                println("stops count = \(stops.count)")
                 switch stops.count {
                 case 2...Int.max:
                     //println("Case 2")
                     let stop0_id: SwiftyJSON.JSON = stops[0]["id"]
                     let stop1_id: SwiftyJSON.JSON = stops[1]["id"]
-                    //println("\(stop0_id)")
+
                     Alamofire.request(.GET, "http://api.pugetsound.onebusaway.org/api/where/arrivals-and-departures-for-stop/\(stop0_id).json?key=org.onebusaway.iphone&version=2")
                         .responseJSON { (_, _, data, error) in
                             var responseJSON: SwiftyJSON.JSON
@@ -161,30 +158,23 @@ class TodayViewController: UIViewController, CLLocationManagerDelegate, NCWidget
                             } else {
                                 responseJSON = SwiftyJSON.JSON.nullJSON
                             }
-                            //println("\(responseJSON)")
-                            let stop0_buses: Array<JSON> = responseJSON["data"]["entry"]["arrivalsAndDepartures"].arrayValue
+                            println("\(responseJSON)")
+                            var stop0_buses: Array<JSON> = responseJSON["data"]["entry"]["arrivalsAndDepartures"].arrayValue
+                            let currentTime: Int = responseJSON["currentTime"].intValue
+                            stop0_buses.sort({$0["predictedArrivalTime"].intValue > $1["predictedArrivalTime"].intValue})
+                            stop0_buses = stop0_buses.filter({
+                                $0["predictedArrivalTime"].intValue > currentTime})
+                            
+                            println("\(stop0_buses)")
                             if stop0_buses.count > 0 {
-                                //we pick the first bus that is predicted to arrive AFTER current time
-                                //yes this is ghetto TODO
-                                var i: Int = 0
-                                let currentTime: Int = responseJSON["currentTime"].intValue
-                                var i_arrival: Int = stop0_buses[i]["predictedArrivalTime"].intValue
-                                while  i_arrival < currentTime {
-                                    i = i+1
-                                    if i == stop0_buses.count {
-                                        return
-                                    }
-                                    i_arrival = stop0_buses[i]["predictedArrivalTime"].intValue
-                                }
-                                
-                                
                                 //Build the RouteNum by combining Bus Number and Bus Compass direction)
-                                let busNum = stop0_buses[i]["routeShortName"]
-                                let busDirection = stops[i]["direction"]
+                                let busNum = stop0_buses[0]["routeShortName"]
+
+                                let busDirection = stops[0]["direction"]
                                 self.NearbyOne_RouteNum.text = "\(busNum)\(busDirection)"
                                 
                                 //Json provides epoch time in milliseconds were converting to seconds.
-                                let busPredictedArrivalEpochTime = stop0_buses[i]["predictedArrivalTime"].doubleValue/1000
+                                let busPredictedArrivalEpochTime = stop0_buses[0]["predictedArrivalTime"].doubleValue/1000
                                 let now = NSDate()
                                 
                                 //Display Minutes to bus arrival
@@ -211,29 +201,20 @@ class TodayViewController: UIViewController, CLLocationManagerDelegate, NCWidget
                                         responseJSON = SwiftyJSON.JSON.nullJSON
                                     }
                                     //println("\(responseJSON)")
-                                    let stop1_buses: Array<JSON> = responseJSON["data"]["entry"]["arrivalsAndDepartures"].arrayValue
+                                    var stop1_buses: Array<JSON> = responseJSON["data"]["entry"]["arrivalsAndDepartures"].arrayValue
+                                    let currentTime: Int = responseJSON["currentTime"].intValue
+                                    stop1_buses.sort({$0["predictedArrivalTime"].intValue > $1["predictedArrivalTime"].intValue})
+                                    stop1_buses = stop1_buses.filter({
+                                        $0["predictedArrivalTime"].intValue > currentTime})
+
                                     if stop1_buses.count > 0 {
-                                        //we pick the first bus that is predicted to arrive AFTER current time
-                                        //yes this is ghetto TODO
-                                        var i: Int = 0
-                                        let currentTime: Int = responseJSON["currentTime"].intValue
-                                        var i_arrival: Int = stop1_buses[i]["predictedArrivalTime"].intValue
-                                        while  i_arrival < currentTime {
-                                            i = i+1
-                                            if i == stop1_buses.count {
-                                                return
-                                            }
-                                            i_arrival = stop1_buses[i]["predictedArrivalTime"].intValue
-                                        }
-                                        
-                                        
                                         //Build the RouteNum by combining Bus Number and Bus Compass direction)
-                                        let busNum = stop1_buses[i]["routeShortName"]
-                                        let busDirection = stops[i]["direction"]
+                                        let busNum = stop1_buses[0]["routeShortName"]
+                                        let busDirection = stops[1]["direction"]
                                         self.NearbyTwo_RouteNum.text = "\(busNum)\(busDirection)"
                                         
                                         //Json provides epoch time in milliseconds were converting to seconds.
-                                        let busPredictedArrivalEpochTime = stop1_buses[i]["predictedArrivalTime"].doubleValue/1000
+                                        let busPredictedArrivalEpochTime = stop1_buses[0]["predictedArrivalTime"].doubleValue/1000
                                         let now = NSDate()
                                         
                                         //Display Minutes to bus arrival
@@ -267,12 +248,15 @@ class TodayViewController: UIViewController, CLLocationManagerDelegate, NCWidget
                             }
                             //println("\(responseJSON)")
                             var stop0_buses: Array<JSON> = responseJSON["data"]["entry"]["arrivalsAndDepartures"].arrayValue
-                            switch stop0_buses.count {
-                            case 1...Int.max:
+                            
+                            let currentTime: Int = responseJSON["currentTime"].intValue
+                            stop0_buses.sort({$0["predictedArrivalTime"].intValue > $1["predictedArrivalTime"].intValue})
+                            stop0_buses = stop0_buses.filter({
+                                $0["predictedArrivalTime"].intValue > currentTime})
+                            if stop0_buses.count > 0 {
                                 //we pick the first bus that is predicted to arrive AFTER current time
                                 //yes this is ghetto TODO
                                 var i: Int = 0
-                                let currentTime: Int = responseJSON["currentTime"].intValue
                                 var i_arrival: Int = stop0_buses[i]["predictedArrivalTime"].intValue
                                 while  i_arrival < currentTime {
                                     i = i+1
@@ -283,12 +267,12 @@ class TodayViewController: UIViewController, CLLocationManagerDelegate, NCWidget
                                 }
                             
                                 //Build the RouteNum by combining Bus Number and Bus Compass direction)
-                                let busNum = stop0_buses[i]["routeShortName"]
-                                let busDirection = stops[i]["direction"]
+                                let busNum = stop0_buses[0]["routeShortName"]
+                                let busDirection = stops[0]["direction"]
                                 self.NearbyOne_RouteNum.text = "\(busNum)\(busDirection)"
                                 
                                 //Json provides epoch time in milliseconds were converting to seconds.
-                                let busPredictedArrivalEpochTime = stop0_buses[i]["predictedArrivalTime"].doubleValue/1000
+                                let busPredictedArrivalEpochTime = stop0_buses[0]["predictedArrivalTime"].doubleValue/1000
                                 let now = NSDate()
                                 
                                 //Display Minutes to bus arrival
@@ -301,26 +285,14 @@ class TodayViewController: UIViewController, CLLocationManagerDelegate, NCWidget
                                 let hhmmFormatter = NSDateFormatter()
                                 hhmmFormatter.dateFormat = "h:mm a"
                                 self.NearbyOne_ArrivalTime.text = hhmmFormatter.stringFromDate(arrival)
-                                //TODO oh god im so sorry this is the worst
-                                stop0_buses.removeAtIndex(i)
-                                
-                                i = 0
-                                i_arrival = stop0_buses[i]["predictedArrivalTime"].intValue
-                                while  i_arrival < currentTime {
-                                    i = i+1
-                                    if i == stop0_buses.count {
-                                        return
-                                    }
-                                    i_arrival = stop0_buses[i]["predictedArrivalTime"].intValue
-                                }
-                                
+                                                                if stop0_buses.count > 1 {
                                 //Build the RouteNum by combining Bus Number and Bus Compass direction)
-                                let bus2Num = stop0_buses[i]["routeShortName"]
-                                let bus2Direction = stops[i]["direction"]
+                                let bus2Num = stop0_buses[1]["routeShortName"]
+                                let bus2Direction = stops[1]["direction"]
                                 self.NearbyTwo_RouteNum.text = "\(busNum)\(busDirection)"
                                 
                                 //Json provides epoch time in milliseconds were converting to seconds.
-                                let bus2PredictedArrivalEpochTime = stop0_buses[i]["predictedArrivalTime"].doubleValue/1000
+                                let bus2PredictedArrivalEpochTime = stop0_buses[1]["predictedArrivalTime"].doubleValue/1000
                                 
                                 
                                 //Display Minutes to bus arrival
@@ -330,11 +302,7 @@ class TodayViewController: UIViewController, CLLocationManagerDelegate, NCWidget
                                 
                                 //Display arrival time in 12:00 AM format
                                 let arrival2 = NSDate(timeIntervalSince1970: busPredictedArrivalEpochTime)
-                                self.NearbyTwo_ArrivalTime.text = hhmmFormatter.stringFromDate(arrival)
-                            case 0:
-                                println("Case 0")
-                            default:
-                                println("Case Default")
+                                self.NearbyTwo_ArrivalTime.text = hhmmFormatter.stringFromDate(arrival)}
                             }
                     }
                 case 0:
