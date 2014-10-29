@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="6250" systemVersion="14A388a" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="M4Y-Lb-cyx">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="6250" systemVersion="14A389" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="M4Y-Lb-cyx">
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="6244"/>
         <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
@@ -14,8 +14,8 @@
                         <viewControllerLayoutGuide type="top" id="qPN-Gz-6Pe"/>
                         <viewControllerLayoutGuide type="bottom" id="YZY-E2-EjG"/>
                     </layoutGuides>
-                    <view key="view" contentMode="top" horizontalCompressionResistancePriority="1000" verticalCompressionResistancePriority="250" simulatedAppContext="notificationCenter" id="S3S-Oj-5AN">
-                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                    <view key="view" contentMode="top" horizontalCompressionResistancePriority="1000" simulatedAppContext="notificationCenter" id="S3S-Oj-5AN">
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="280"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <view clipsSubviews="YES" contentMode="top" horizontalCompressionResistancePriority="1000" verticalCompressionResistancePriority="250" simulatedAppContext="notificationCenter" translatesAutoresizingMaskIntoConstraints="NO" id="A03-dP-gR5" userLabel="NearbyRouteHeader">
@@ -55,8 +55,8 @@
                                     </mask>
                                 </variation>
                             </view>
-                            <view clipsSubviews="YES" tag="1" contentMode="top" horizontalCompressionResistancePriority="1000" verticalCompressionResistancePriority="250" simulatedAppContext="notificationCenter" translatesAutoresizingMaskIntoConstraints="NO" id="VVa-W6-1sN" userLabel="NearRouteTwo">
-                                <rect key="frame" x="0.0" y="210" width="600" height="390"/>
+                            <view clipsSubviews="YES" tag="1" contentMode="top" horizontalCompressionResistancePriority="1000" simulatedAppContext="notificationCenter" translatesAutoresizingMaskIntoConstraints="NO" id="VVa-W6-1sN" userLabel="NearRouteTwo">
+                                <rect key="frame" x="0.0" y="210" width="600" height="70"/>
                                 <subviews>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Route" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="RmL-TU-1hX">
                                         <rect key="frame" x="8" y="8" width="46" height="21"/>
@@ -119,7 +119,7 @@
                                         </variation>
                                     </label>
                                 </subviews>
-                                <rect key="contentStretch" x="0.050000000000000003" y="0.20000000000000001" width="1" height="0.74999999999999978"/>
+                                <rect key="contentStretch" x="0.050000000000000003" y="0.20000000000000001" width="1" height="1"/>
                                 <constraints>
                                     <constraint firstItem="qXx-yy-11u" firstAttribute="trailing" secondItem="Sot-jg-nhI" secondAttribute="trailing" id="4Yb-PP-MlY"/>
                                     <constraint firstItem="dDE-vk-ffa" firstAttribute="baseline" secondItem="DsW-Cb-DWV" secondAttribute="baseline" id="7U2-0g-5t1"/>
@@ -360,8 +360,8 @@
                             <view clipsSubviews="YES" contentMode="top" horizontalCompressionResistancePriority="1000" verticalCompressionResistancePriority="250" simulatedAppContext="notificationCenter" translatesAutoresizingMaskIntoConstraints="NO" id="aet-cf-f52">
                                 <rect key="frame" x="0.0" y="0.0" width="600" height="35"/>
                                 <subviews>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="Favorite Stop" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="agA-qn-JVu">
-                                        <rect key="frame" x="244" y="8" width="113" height="19"/>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Favorite Stop" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="agA-qn-JVu">
+                                        <rect key="frame" x="249" y="8" width="103" height="19"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="21" id="L6K-pf-BId"/>
                                             <constraint firstAttribute="width" secondItem="agA-qn-JVu" secondAttribute="height" multiplier="32:21" id="MoA-R5-l9Q"/>
@@ -453,6 +453,8 @@
                     <nil key="simulatedTopBarMetrics"/>
                     <nil key="simulatedBottomBarMetrics"/>
                     <simulatedOrientationMetrics key="simulatedOrientationMetrics"/>
+                    <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
+                    <size key="freeformSize" width="600" height="280"/>
                     <connections>
                         <outlet property="Fav_ArrivalTime" destination="6K9-tc-E8z" id="8Nr-cr-hdl"/>
                         <outlet property="Fav_Minutes" destination="POC-7T-vTc" id="plw-fd-ido"/>

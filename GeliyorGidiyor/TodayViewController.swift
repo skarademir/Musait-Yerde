@@ -36,8 +36,14 @@ class TodayViewController: UIViewController, CLLocationManagerDelegate, NCWidget
         locationManager.desiredAccuracy = kCLLocationAccuracyBestForNavigation
         locationManager.requestWhenInUseAuthorization()
         locationManager.pausesLocationUpdatesAutomatically = true
-        updateFavStop("1_13460",favRouteId: "40_100236")
+        let sharedDefaults = NSUserDefaults(suiteName: "group.Musait-Yerde")
+        var favStopId: String = "1_13460"
+        //favStopId = sharedDefaults!.objectForKey("numberPass") as String
+        //sharedDefaults.
+        println(favStopId)
         
+        updateFavStop(favStopId,favRouteId: "40_100236")
+
         
         locationManager.startUpdatingLocation()
         
@@ -58,12 +64,13 @@ class TodayViewController: UIViewController, CLLocationManagerDelegate, NCWidget
                 //println("\(favstop_buses)")
                 
                 let currentTime: Int = responseJSON["currentTime"].intValue
-                favstop_buses.sort({$0["predictedArrivalTime"].intValue > $1["predictedArrivalTime"].intValue})
+                
                 favstop_buses = favstop_buses.filter({
                     var didntArriveYet: Bool = $0["predictedArrivalTime"].intValue > currentTime;
                     var onFavRoute: Bool = $0["routeId"].stringValue == favRouteId;
                     println ("\(didntArriveYet && onFavRoute)");
                     return didntArriveYet && onFavRoute })
+                favstop_buses.sort({$0["predictedArrivalTime"].intValue < $1["predictedArrivalTime"].intValue})
                 
                 if favstop_buses.count > 0 {
                     //Build the RouteNum by combining Bus Number and Bus Compass direction)
@@ -96,9 +103,6 @@ class TodayViewController: UIViewController, CLLocationManagerDelegate, NCWidget
     func widgetPerformUpdateWithCompletionHandler(completionHandler: ((NCUpdateResult) -> Void)!) {
         // Perform any setup necessary in order to update the view.
         //TODO~~this grabs the Favorite Bus route from the Parent App~~
-        //let sharedDefaults = NSUserDefaults(suiteName: “group.YOURGROUPHERE”)
-        
-        //favRouteNum.text = sharedDefaults.objectForKey(“numberPass”) as String
         
         
         
@@ -158,14 +162,15 @@ class TodayViewController: UIViewController, CLLocationManagerDelegate, NCWidget
                             } else {
                                 responseJSON = SwiftyJSON.JSON.nullJSON
                             }
-                            println("\(responseJSON)")
+                            //println("\(responseJSON)")
                             var stop0_buses: Array<JSON> = responseJSON["data"]["entry"]["arrivalsAndDepartures"].arrayValue
                             let currentTime: Int = responseJSON["currentTime"].intValue
-                            stop0_buses.sort({$0["predictedArrivalTime"].intValue > $1["predictedArrivalTime"].intValue})
+
                             stop0_buses = stop0_buses.filter({
                                 $0["predictedArrivalTime"].intValue > currentTime})
+                            stop0_buses.sort({$0["predictedArrivalTime"].intValue < $1["predictedArrivalTime"].intValue})
                             
-                            println("\(stop0_buses)")
+                            //println("\(stop0_buses)")
                             if stop0_buses.count > 0 {
                                 //Build the RouteNum by combining Bus Number and Bus Compass direction)
                                 let busNum = stop0_buses[0]["routeShortName"]
@@ -203,9 +208,10 @@ class TodayViewController: UIViewController, CLLocationManagerDelegate, NCWidget
                                     //println("\(responseJSON)")
                                     var stop1_buses: Array<JSON> = responseJSON["data"]["entry"]["arrivalsAndDepartures"].arrayValue
                                     let currentTime: Int = responseJSON["currentTime"].intValue
-                                    stop1_buses.sort({$0["predictedArrivalTime"].intValue > $1["predictedArrivalTime"].intValue})
+
                                     stop1_buses = stop1_buses.filter({
                                         $0["predictedArrivalTime"].intValue > currentTime})
+                                    stop1_buses.sort({$0["predictedArrivalTime"].intValue < $1["predictedArrivalTime"].intValue})
 
                                     if stop1_buses.count > 0 {
                                         //Build the RouteNum by combining Bus Number and Bus Compass direction)
@@ -250,9 +256,11 @@ class TodayViewController: UIViewController, CLLocationManagerDelegate, NCWidget
                             var stop0_buses: Array<JSON> = responseJSON["data"]["entry"]["arrivalsAndDepartures"].arrayValue
                             
                             let currentTime: Int = responseJSON["currentTime"].intValue
-                            stop0_buses.sort({$0["predictedArrivalTime"].intValue > $1["predictedArrivalTime"].intValue})
+
                             stop0_buses = stop0_buses.filter({
                                 $0["predictedArrivalTime"].intValue > currentTime})
+                            stop0_buses.sort({$0["predictedArrivalTime"].intValue < $1["predictedArrivalTime"].intValue})
+                            
                             if stop0_buses.count > 0 {
                                 //we pick the first bus that is predicted to arrive AFTER current time
                                 //yes this is ghetto TODO
