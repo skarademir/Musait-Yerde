@@ -29,7 +29,7 @@ This section will tell you the next bus for the nearest two stops. If it can't f
 
 I have a plan. Its not ordered:
 
-* Turn the UI to be UITableView-based, making it easy to add and drop incoming Buses.
+* DONE - Turn the UI to be UITableView-based, making it easy to add and drop incoming Buses.
 * Remove the bulk of hte logic from the locationManager callback. Place the logic within the Table objects themselves. Or something?
 * Build the Host App interface to at least provide a way to pick Stops.
 * Experiment with more useful UI. Maybe a map? maybe more information about the stop and the bus. Is it possible to embed a map? that would be nice
