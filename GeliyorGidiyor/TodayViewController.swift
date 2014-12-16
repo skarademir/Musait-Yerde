@@ -119,8 +119,6 @@ class TodayViewController: UITableViewController, CLLocationManagerDelegate, NCW
             .responseJSON { (_, _, data, error) in
                 var responseJSON: SwiftyJSON.JSON
                 if error != nil {
-                    
-                    self.networkError = true;
                     self.networkError = true
                     responseJSON = SwiftyJSON.JSON.nullJSON
                 } else if data != nil {
@@ -143,7 +141,6 @@ class TodayViewController: UITableViewController, CLLocationManagerDelegate, NCW
                 if favstop_buses.count > 0 {
                     //Build the RouteNum by combining Bus Number and Bus Compass direction)
                     self.favoriteList.append(favstop_buses[0])
-                    let busNum = favstop_buses[0]["routeShortName"]
                     let busDirection = responseJSON["data"]["references"]["stops"][0]["direction"]
                     self.favoriteDirectionList.append(busDirection)
 
