@@ -6,7 +6,7 @@ An iOS 8 Today Extension proof-of-concept for onebusaway
 I want to start by apologizing.
 What I am apologizing for:
 * No documentation
-* Terrible hardcoded UI entirely handled by autoconstraint
+*
 * Disgusting Code
 * Hardcoded Favorite Stop
 * Unpublishable (Apple requires a functional Host App)
