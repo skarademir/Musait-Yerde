@@ -14,52 +14,114 @@ import SwiftyJSON
 
 class TodayViewController: UITableViewController, CLLocationManagerDelegate, NCWidgetProviding {
 
-    
     struct TableViewConstants {
         static let baseRowCount = 3
-        static let todayRowHeight = 75
+        static let todayRowHeight = 75.0
+        static let todaySectionHeight = 22.0
         
         struct CellIdentifiers {
             static let content = "busViewCell"
             static let message = "messageCell"
         }
     }
-    
-    
+    struct FavoriteRouteStop {
+        var stopId: String;
+        var routeId: String;
+    }
+
     let locationManager = CLLocationManager()
-    var favoriteList = Array<SwiftyJSON.JSON>()
+    var favoriteList: Array<SwiftyJSON.JSON> = []{
+        didSet {
+            self.tableView.reloadData()
+            resetContentSize()
+        }
+    }
     var favoriteDirectionList = Array<SwiftyJSON.JSON>()
-    var routeList = Array<SwiftyJSON.JSON>()
+    var routeList : Array<SwiftyJSON.JSON> = []{
+        didSet {
+                self.tableView.reloadData()
+                resetContentSize()
+        }
+    }
     var routeDirectionList = Array<SwiftyJSON.JSON>()
+    var networkError: Bool = false
+    
+    // MARK: View Sizing
+    
+    var preferredViewHeight: CGFloat { // this is so primitive. There must be a better way
+        let itemCount = routeList.count > 0 && favoriteList.count > 0 ? favoriteList.count + routeList.count : 1
+        let sectionHeaderCount = routeList.count > 0 ? 1 : 0 + favoriteList.count > 0 ? 1 : 0
+        //let rowCount = showingAll ? itemCount : min(itemCount, TableViewConstants.baseRowCount + 1)
+        
+        return CGFloat(Double(itemCount) * TableViewConstants.todayRowHeight + Double(sectionHeaderCount) * TableViewConstants.todaySectionHeight)
+    }
+    
+    func resetContentSize() {
+        var preferredSize = preferredContentSize
+        
+        preferredSize.height = preferredViewHeight
+        
+        preferredContentSize = preferredSize
+    }
     
     // MARK: View Life Cycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        //init location manager delegate and request A8uthoriization from user
+        
+        
+               //init location manager delegate and request A8uthoriization from user
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBestForNavigation
         locationManager.requestWhenInUseAuthorization()
         locationManager.pausesLocationUpdatesAutomatically = true
+        
+        //use SharedDefaults to build the Favorite Stop Routes to display
         let sharedDefaults = NSUserDefaults(suiteName: "group.Musait-Yerde")
-        var favStopId: String = "1_13460"
+        
         //favStopId = sharedDefaults!.objectForKey("numberPass") as String
         //sharedDefaults.
+        var favStopId: String = "1_13460"
+        var favRouteId: String = "40_100236"
+        let now = NSDate()
+        //two ways to determine if its AM or PM
+        //Method One: extract hour as integer using NSDateComponents
+        let calendar = NSCalendar.currentCalendar()
+        let components = calendar.components (NSCalendarUnit.CalendarUnitHour, fromDate: now)
+        let hour = components.hour
+        if hour < 12 { // Morning
+            var favoriteStop_AM = FavoriteRouteStop(stopId: favStopId,routeId: favRouteId)
+            updateFavStop([favoriteStop_AM])
+        } else {
+            //var favoriteStop_PM
+            updateFavStop([FavoriteRouteStop(stopId: "1_71335",routeId: "40_100236"),FavoriteRouteStop(stopId: "1_71335",routeId: "40_100511"),FavoriteRouteStop(stopId: "1_10914",routeId: "1_100447")])
+        }
+        //Method Two: Build an string using NSDateFormatter and compare that against "AM"
+        //Should be slower. But i need to bench first
+        /*
+        let aFormatter = NSDateFormatter()
+        aFormatter.dateFormat = "a"
+        if aFormatter.stringFromDate(now) == "AM" {
+            
+        } else {
         
-        println(favStopId)
-        
-        updateFavStop(favStopId,favRouteId: "40_100236")
-
-        
+        }
+        */
         locationManager.startUpdatingLocation()
+        
         
     }
     
-    func updateFavStop(favStopId: String , favRouteId: String) {
-        Alamofire.request(.GET, "http://api.pugetsound.onebusaway.org/api/where/arrivals-and-departures-for-stop/\(favStopId).json?key=org.onebusaway.iphone&version=2")
+    func updateFavStop(favoriteRouteStops: Array<FavoriteRouteStop>) {
+        for favoriteRouteStop in favoriteRouteStops {
+
+        Alamofire.request(.GET, "http://api.pugetsound.onebusaway.org/api/where/arrivals-and-departures-for-stop/\(favoriteRouteStop.stopId).json?key=org.onebusaway.iphone&version=2")
             .responseJSON { (_, _, data, error) in
                 var responseJSON: SwiftyJSON.JSON
                 if error != nil {
+                    
+                    self.networkError = true;
+                    self.networkError = true
                     responseJSON = SwiftyJSON.JSON.nullJSON
                 } else if data != nil {
                     responseJSON = SwiftyJSON.JSON(data!)
@@ -74,7 +136,7 @@ class TodayViewController: UITableViewController, CLLocationManagerDelegate, NCW
                 
                 favstop_buses = favstop_buses.filter({
                     var didntArriveYet: Bool = $0["predictedArrivalTime"].intValue > currentTime;
-                    var onFavRoute: Bool = $0["routeId"].stringValue == favRouteId;
+                    var onFavRoute: Bool = $0["routeId"].stringValue == favoriteRouteStop.routeId;
                     println ("\(didntArriveYet && onFavRoute)");
                     return didntArriveYet && onFavRoute })
                 favstop_buses.sort({$0["predictedArrivalTime"].intValue < $1["predictedArrivalTime"].intValue})
@@ -84,7 +146,11 @@ class TodayViewController: UITableViewController, CLLocationManagerDelegate, NCW
                     let busNum = favstop_buses[0]["routeShortName"]
                     let busDirection = responseJSON["data"]["references"]["stops"][0]["direction"]
                     self.favoriteDirectionList.append(busDirection)
+
                 }
+            
+        }
+            
         }
     }
     override func didReceiveMemoryWarning() {
@@ -95,7 +161,8 @@ class TodayViewController: UITableViewController, CLLocationManagerDelegate, NCW
     // MARK: NCWidgetProviding
     
     func widgetMarginInsetsForProposedMarginInsets(defaultMarginInsets: UIEdgeInsets) -> UIEdgeInsets {
-        return UIEdgeInsets(top: defaultMarginInsets.top, left: 27.0, bottom: defaultMarginInsets.bottom, right: defaultMarginInsets.right)
+        return UIEdgeInsets(top: defaultMarginInsets.top, left: 27.0, bottom: 0.0
+            , right: defaultMarginInsets.right)
     }
     
     func widgetPerformUpdateWithCompletionHandler(completionHandler: ((NCUpdateResult) -> Void)!) {
@@ -123,13 +190,14 @@ class TodayViewController: UITableViewController, CLLocationManagerDelegate, NCW
         //println("locations = \(locations)")
         var latValue = locationManager.location.coordinate.latitude
         var lonValue = locationManager.location.coordinate.longitude
-        //println("\(latValue)")
-        //println("\(lonValue)")
+        println("\(latValue)")
+        println("\(lonValue)")
         
         Alamofire.request(.GET, "http://api.pugetsound.onebusaway.org/api/where/stops-for-location.json?key=org.onebusaway.iphone&app_uid=1EC3E57A-B013-40CC-A495-4F0A3CB2FC79&app_ver=2.2.1&lat=\(latValue)&lon=\(lonValue)&latSpan=0.002960&lonSpan=0.004426&version=2")
             .responseJSON { (_, _, data, error) in
                 var responseJSON: SwiftyJSON.JSON
                 if error != nil {
+                    self.networkError = true;
                     responseJSON = SwiftyJSON.JSON.nullJSON
                     //println("nullJSON")
                     //println("\(error)")
@@ -156,6 +224,8 @@ class TodayViewController: UITableViewController, CLLocationManagerDelegate, NCW
                         .responseJSON { (_, _, data, error) in
                             var responseJSON: SwiftyJSON.JSON
                             if error != nil {
+                                
+                                self.networkError = true;
                                 responseJSON = SwiftyJSON.JSON.nullJSON
                             } else if data != nil {
                                 responseJSON = SwiftyJSON.JSON(data!)
@@ -179,7 +249,7 @@ class TodayViewController: UITableViewController, CLLocationManagerDelegate, NCW
                                 self.routeList.append(stop0_buses[0])
                                 self.routeDirectionList.append(busDirection)
                                 println("C2S0 RouteList count: \(self.routeList.count)")
-                                self.tableView.reloadData()
+                                
                             }
                     }
                             //println("\(stop1_id)")
@@ -187,6 +257,8 @@ class TodayViewController: UITableViewController, CLLocationManagerDelegate, NCW
                                 .responseJSON { (_, _, data, error) in
                                     var responseJSON: SwiftyJSON.JSON
                                     if error != nil {
+                                        
+                                        self.networkError = true;
                                         responseJSON = SwiftyJSON.JSON.nullJSON
                                     } else if data != nil {
                                         responseJSON = SwiftyJSON.JSON(data!)
@@ -212,8 +284,6 @@ class TodayViewController: UITableViewController, CLLocationManagerDelegate, NCW
                                         
                                         println("C2S1 RouteList count: \(self.routeList.count)")
                                     }
-                                    
-                                    self.tableView.reloadData()
 
                     
                     }
@@ -226,6 +296,8 @@ class TodayViewController: UITableViewController, CLLocationManagerDelegate, NCW
                         .responseJSON { (_, _, data, error) in
                             var responseJSON: SwiftyJSON.JSON
                             if error != nil {
+                                
+                                self.networkError = true;
                                 responseJSON = SwiftyJSON.JSON.nullJSON
                             } else if data != nil {
                                 responseJSON = SwiftyJSON.JSON(data!)
@@ -267,8 +339,7 @@ class TodayViewController: UITableViewController, CLLocationManagerDelegate, NCW
                                 self.routeDirectionList.append(busDirection)
                                 println("C1B1 RouteList count: \(self.routeList.count)")
                                 }
-                                
-                                //self.tableView.reloadData()
+
                             }
                     }
                 case 0:
@@ -288,14 +359,40 @@ class TodayViewController: UITableViewController, CLLocationManagerDelegate, NCW
     override func numberOfSectionsInTableView(_ tableView: UITableView) -> Int {
         return 2
     }
+    override func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        switch section {
+        case 1: //nearby Routes
+            if routeList.count > 0  {
+                return NSLocalizedString("Nearby Routes", comment: "")
+            }
+            else {
+                return ""
+            }
+        case 0: //nearby Favorites
+            if favoriteList.count > 0 {
+                return NSLocalizedString("Favorite Routes", comment: "")
+            }
+            else {
+                return ""
+            }
+        default:
+            return ""
+        }
+    }
+    override func tableView(tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
+        view.tintColor = UIColor.clearColor()
+        var header = view as UITableViewHeaderFooterView
+        header.textLabel.textColor = UIColor.whiteColor()
+        header.textLabel.font = UIFont(name: "Helventica Neue", size: 11)
+    }
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         switch section {
-        case 1:
+        case 1: //nearby Routes
             if routeList.count < 1 {
                 return 1
             }
             return min(routeList.count, TableViewConstants.baseRowCount + 1)
-        case 0:
+        case 0: //favorite Routes
             return favoriteList.count
         default:
             return 0
@@ -307,7 +404,8 @@ class TodayViewController: UITableViewController, CLLocationManagerDelegate, NCW
     }
     
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        if routeList.count > 0 {
+        if routeList.count  > 0 || (favoriteList.count > 0 && indexPath.section == 0){
+            
             let cell = tableView.dequeueReusableCellWithIdentifier(TableViewConstants.CellIdentifiers.content, forIndexPath: indexPath) as busViewCell
             if indexPath.section == 1 {
                 configureBusItemCell(cell, busJSON: routeList[indexPath.row], busDirection: routeDirectionList[indexPath.row])
@@ -317,13 +415,18 @@ class TodayViewController: UITableViewController, CLLocationManagerDelegate, NCW
                 configureBusItemCell(cell, busJSON: favoriteList[indexPath.row], busDirection: favoriteDirectionList[indexPath.row])
                 tableView.headerViewForSection(indexPath.section)?.textLabel.text = "Favorite Route"
             }
-
+            cell.textLabel.text = ""
             return cell
         }
         else {
             let cell = tableView.dequeueReusableCellWithIdentifier(TableViewConstants.CellIdentifiers.content, forIndexPath: indexPath) as UITableViewCell
-                cell.textLabel.text = NSLocalizedString("No items in today's list", comment: "")
-
+            if networkError {
+                cell.textLabel.text = NSLocalizedString("Network Error", comment: "")
+            }
+            else{
+                cell.textLabel.text = NSLocalizedString("No Nearby buses and running Favorites.", comment: "")
+            }
+            cell.textLabel.textColor = UIColor.lightTextColor()
             return cell
         }
     }
@@ -348,8 +451,6 @@ class TodayViewController: UITableViewController, CLLocationManagerDelegate, NCW
         hhmmFormatter.dateFormat = "h:mm a"
         itemCell.ArrivalTime.text = hhmmFormatter.stringFromDate(arrival)
     }
-    
-    
     
     // MARK: UITableViewDelegate
     
