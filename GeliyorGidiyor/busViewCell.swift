@@ -10,6 +10,7 @@ import UIKit
 
 class busViewCell: UITableViewCell {
     
+    @IBOutlet var Destination: UILabel!
     @IBOutlet var RouteNum: UILabel!
     @IBOutlet var Minutes: UILabel!
     @IBOutlet var ArrivalTime: UILabel!

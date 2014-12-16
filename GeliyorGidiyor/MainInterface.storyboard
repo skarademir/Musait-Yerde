@@ -27,8 +27,8 @@
                                             <color key="textColor" cocoaTouchSystemColor="lightTextColor"/>
                                             <nil key="highlightedColor"/>
                                         </label>
-                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Minutes" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="EmP-vx-HgJ">
-                                            <rect key="frame" x="381" y="8" width="61" height="21"/>
+                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" text="Minutes" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="EmP-vx-HgJ">
+                                            <rect key="frame" x="274" y="8" width="168" height="21"/>
                                             <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                             <color key="textColor" cocoaTouchSystemColor="lightTextColor"/>
                                             <nil key="highlightedColor"/>
@@ -51,14 +51,14 @@
                                                 </mask>
                                             </variation>
                                         </label>
-                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Route" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="tiH-qC-biI">
-                                            <rect key="frame" x="8" y="8" width="46" height="21"/>
+                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" text="Route" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="tiH-qC-biI">
+                                            <rect key="frame" x="8" y="8" width="169" height="21"/>
                                             <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                             <color key="textColor" cocoaTouchSystemColor="lightTextColor"/>
                                             <nil key="highlightedColor"/>
                                         </label>
-                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Arrival Time" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="eR4-B0-hkU">
-                                            <rect key="frame" x="180" y="8" width="91" height="21"/>
+                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" text="Destination" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" adjustsLetterSpacingToFitWidth="YES" translatesAutoresizingMaskIntoConstraints="NO" id="eR4-B0-hkU" userLabel="Destination">
+                                            <rect key="frame" x="182" y="8" width="87" height="21"/>
                                             <constraints>
                                                 <constraint firstAttribute="height" constant="21" id="2KW-8O-5Hq"/>
                                                 <constraint firstAttribute="width" constant="32" id="Db6-UM-58b"/>
@@ -84,14 +84,17 @@
                                     </subviews>
                                     <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                     <constraints>
+                                        <constraint firstItem="EmP-vx-HgJ" firstAttribute="leading" secondItem="eR4-B0-hkU" secondAttribute="trailing" constant="5" id="1Bn-Uq-OGS"/>
                                         <constraint firstItem="Kmh-4s-0AY" firstAttribute="leading" secondItem="Eyz-aX-NdS" secondAttribute="leadingMargin" id="CCV-ck-SFP"/>
                                         <constraint firstItem="EmP-vx-HgJ" firstAttribute="baseline" secondItem="eR4-B0-hkU" secondAttribute="baseline" id="DRc-4r-H9i"/>
                                         <constraint firstItem="Kmh-4s-0AY" firstAttribute="baseline" secondItem="QLv-Xr-nDP" secondAttribute="baseline" id="Gmq-2B-sld"/>
                                         <constraint firstItem="eR4-B0-hkU" firstAttribute="centerX" secondItem="QLv-Xr-nDP" secondAttribute="centerX" id="QCG-Rx-uIi"/>
                                         <constraint firstItem="Kmh-4s-0AY" firstAttribute="top" secondItem="tiH-qC-biI" secondAttribute="bottom" constant="8" symbolic="YES" id="SnN-2M-gWi"/>
+                                        <constraint firstItem="eR4-B0-hkU" firstAttribute="leading" secondItem="tiH-qC-biI" secondAttribute="leading" constant="174" id="WKS-I4-t6D"/>
                                         <constraint firstItem="QLv-Xr-nDP" firstAttribute="centerX" secondItem="Eyz-aX-NdS" secondAttribute="centerX" id="YgF-n2-DuW"/>
                                         <constraint firstItem="mgD-aK-EcA" firstAttribute="baseline" secondItem="QLv-Xr-nDP" secondAttribute="baseline" id="coe-Oz-rKu"/>
                                         <constraint firstItem="Kmh-4s-0AY" firstAttribute="leading" secondItem="tiH-qC-biI" secondAttribute="leading" id="cun-Uk-awb"/>
+                                        <constraint firstItem="eR4-B0-hkU" firstAttribute="leading" secondItem="tiH-qC-biI" secondAttribute="trailing" constant="5" id="dEb-8B-AUa"/>
                                         <constraint firstItem="eR4-B0-hkU" firstAttribute="top" secondItem="Eyz-aX-NdS" secondAttribute="topMargin" id="dd8-yA-aCr"/>
                                         <constraint firstItem="EmP-vx-HgJ" firstAttribute="trailing" secondItem="mgD-aK-EcA" secondAttribute="trailing" id="oUx-yF-2qH"/>
                                         <constraint firstItem="eR4-B0-hkU" firstAttribute="centerX" secondItem="QLv-Xr-nDP" secondAttribute="centerX" id="wDe-Ob-X9U"/>
@@ -100,12 +103,14 @@
                                     </constraints>
                                     <variation key="default">
                                         <mask key="constraints">
+                                            <exclude reference="WKS-I4-t6D"/>
                                             <exclude reference="wDe-Ob-X9U"/>
                                         </mask>
                                     </variation>
                                 </tableViewCellContentView>
                                 <connections>
                                     <outlet property="ArrivalTime" destination="QLv-Xr-nDP" id="V5L-JV-IGH"/>
+                                    <outlet property="Destination" destination="eR4-B0-hkU" id="3bv-TZ-EvH"/>
                                     <outlet property="Minutes" destination="mgD-aK-EcA" id="Zry-dy-wEB"/>
                                     <outlet property="RouteNum" destination="Kmh-4s-0AY" id="7Yr-0L-3VA"/>
                                 </connections>

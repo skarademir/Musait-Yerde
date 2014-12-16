@@ -433,6 +433,7 @@ class TodayViewController: UITableViewController, CLLocationManagerDelegate, NCW
     
     func configureBusItemCell(itemCell: busViewCell, busJSON: SwiftyJSON.JSON, busDirection: SwiftyJSON.JSON) {
         let busNum = busJSON["routeShortName"]
+        let busHeadsign = busJSON["tripHeadsign"]
         
         itemCell.RouteNum.text = "\(busNum)\(busDirection)"
         
@@ -450,6 +451,7 @@ class TodayViewController: UITableViewController, CLLocationManagerDelegate, NCW
         let hhmmFormatter = NSDateFormatter()
         hhmmFormatter.dateFormat = "h:mm a"
         itemCell.ArrivalTime.text = hhmmFormatter.stringFromDate(arrival)
+        itemCell.Destination.text = "\(busHeadsign)"
     }
     
     // MARK: UITableViewDelegate
