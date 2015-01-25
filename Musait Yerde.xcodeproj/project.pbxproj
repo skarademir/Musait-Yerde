@@ -77,6 +77,20 @@
 			remoteGlobalIDString = F8111E3219A95C8B0040E7D1;
 			remoteInfo = Alamofire;
 		};
+		6F5448991A6F6A030013E113 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 6FB0C26A19F4D9A800C9EF13 /* SwiftyJSON.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 4EC1C1C91A0C1A2D0026ED0B;
+			remoteInfo = SwiftyJSONOSX;
+		};
+		6F54489B1A6F6A030013E113 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 6FB0C26A19F4D9A800C9EF13 /* SwiftyJSON.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 4EC1C1D31A0C1A2D0026ED0B;
+			remoteInfo = SwiftyJSONOSXTests;
+		};
 		6FB0C27019F4D9A900C9EF13 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 6FB0C26A19F4D9A800C9EF13 /* SwiftyJSON.xcodeproj */;
@@ -310,6 +324,8 @@
 			children = (
 				6FB0C27119F4D9A900C9EF13 /* SwiftyJSON.framework */,
 				6FB0C27319F4D9A900C9EF13 /* SwiftyJSONTests.xctest */,
+				6F54489A1A6F6A030013E113 /* SwiftyJSON.framework */,
+				6F54489C1A6F6A030013E113 /* SwiftyJSONOSXTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -453,6 +469,20 @@
 			fileType = wrapper.cfbundle;
 			path = AlamofireTests.xctest;
 			remoteRef = 6F47FB2419E1E9A70010C855 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		6F54489A1A6F6A030013E113 /* SwiftyJSON.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = SwiftyJSON.framework;
+			remoteRef = 6F5448991A6F6A030013E113 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		6F54489C1A6F6A030013E113 /* SwiftyJSONOSXTests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = SwiftyJSONOSXTests.xctest;
+			remoteRef = 6F54489B1A6F6A030013E113 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		6FB0C27119F4D9A900C9EF13 /* SwiftyJSON.framework */ = {

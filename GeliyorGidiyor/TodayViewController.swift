@@ -15,13 +15,12 @@ import SwiftyJSON
 class TodayViewController: UITableViewController, CLLocationManagerDelegate, NCWidgetProviding {
 
     struct TableViewConstants {
-        static let baseRowCount = 3
+        static let maxRowCount = 7 //limits the total number of stops displayed
         static let todayRowHeight = 75.0
-        static let todaySectionHeight = 22.0
+        static let todaySectionHeight = 43.0
         
         struct CellIdentifiers {
             static let content = "busViewCell"
-            static let message = "messageCell"
         }
     }
     struct FavoriteRouteStop {
@@ -30,27 +29,38 @@ class TodayViewController: UITableViewController, CLLocationManagerDelegate, NCW
     }
 
     let locationManager = CLLocationManager()
+    
     var favoriteList: Array<SwiftyJSON.JSON> = []{
         didSet {
             self.tableView.reloadData()
             resetContentSize()
         }
     }
-    var favoriteDirectionList = Array<SwiftyJSON.JSON>()
-    var routeList : Array<SwiftyJSON.JSON> = []{
+    var favoriteStopList = Array<SwiftyJSON.JSON>()
+    
+    var nearbyStopOneBusList : Array<SwiftyJSON.JSON> = []{
         didSet {
                 self.tableView.reloadData()
                 resetContentSize()
         }
     }
-    var routeDirectionList = Array<SwiftyJSON.JSON>()
+    var nearbyStopOneList: SwiftyJSON.JSON = SwiftyJSON.JSON.nullJSON;
+    
+    var nearbyStopTwoBusList : Array<SwiftyJSON.JSON> = []{
+        didSet {
+            self.tableView.reloadData()
+            resetContentSize()
+        }
+    }
+    var nearbyStopTwoList: SwiftyJSON.JSON = SwiftyJSON.JSON.nullJSON;
+    
     var networkError: Bool = false
     
     // MARK: View Sizing
     
     var preferredViewHeight: CGFloat { // this is so primitive. There must be a better way
-        let itemCount = routeList.count > 0 && favoriteList.count > 0 ? favoriteList.count + routeList.count : 1
-        let sectionHeaderCount = routeList.count > 0 ? 1 : 0 + favoriteList.count > 0 ? 1 : 0
+        let itemCount = (nearbyStopOneBusList.count > 0 || nearbyStopTwoBusList.count > 0) && favoriteList.count > 0 ? favoriteList.count + nearbyStopOneBusList.count + nearbyStopTwoBusList.count : 1
+        let sectionHeaderCount = nearbyStopTwoBusList.count > 0 ? 1 : 0 + nearbyStopOneBusList.count > 0 ? 1 : 0 + favoriteList.count > 0 ? 1 : 0
         //let rowCount = showingAll ? itemCount : min(itemCount, TableViewConstants.baseRowCount + 1)
         
         return CGFloat(Double(itemCount) * TableViewConstants.todayRowHeight + Double(sectionHeaderCount) * TableViewConstants.todaySectionHeight)
@@ -94,7 +104,10 @@ class TodayViewController: UITableViewController, CLLocationManagerDelegate, NCW
             updateFavStop([favoriteStop_AM])
         } else {
             //var favoriteStop_PM
+            
+            
             updateFavStop([FavoriteRouteStop(stopId: "1_71335",routeId: "40_100236"),FavoriteRouteStop(stopId: "1_71335",routeId: "40_100511"),FavoriteRouteStop(stopId: "1_10914",routeId: "1_100447")])
+            //updateFavStop([FavoriteRouteStop(stopId: "1_71334",routeId: "40_100236")]) //ahmet
         }
         //Method Two: Build an string using NSDateFormatter and compare that against "AM"
         //Should be slower. But i need to bench first
@@ -142,12 +155,9 @@ class TodayViewController: UITableViewController, CLLocationManagerDelegate, NCW
                     //Build the RouteNum by combining Bus Number and Bus Compass direction)
                     self.favoriteList.append(favstop_buses[0])
                     let busDirection = responseJSON["data"]["references"]["stops"][0]["direction"]
-                    self.favoriteDirectionList.append(busDirection)
-
+                    self.favoriteStopList.append(responseJSON["data"]["references"]["stops"][0])
                 }
-            
-        }
-            
+            }     
         }
     }
     override func didReceiveMemoryWarning() {
@@ -236,18 +246,8 @@ class TodayViewController: UITableViewController, CLLocationManagerDelegate, NCW
                             stop0_buses = stop0_buses.filter({
                                 $0["predictedArrivalTime"].intValue > currentTime})
                             stop0_buses.sort({$0["predictedArrivalTime"].intValue < $1["predictedArrivalTime"].intValue})
-                            
-                            //println("\(stop0_buses)")
-                            if stop0_buses.count > 0 {
-                                //Build the RouteNum by combining Bus Number and Bus Compass direction)
-                                let busNum = stop0_buses[0]["routeShortName"]
-
-                                let busDirection = stops[0]["direction"]
-                                self.routeList.append(stop0_buses[0])
-                                self.routeDirectionList.append(busDirection)
-                                println("C2S0 RouteList count: \(self.routeList.count)")
-                                
-                            }
+                            self.nearbyStopOneBusList = stop0_buses;
+                            self.nearbyStopOneList = stops[0];
                     }
                             //println("\(stop1_id)")
                             Alamofire.request(.GET, "http://api.pugetsound.onebusaway.org/api/where/arrivals-and-departures-for-stop/\(stop1_id).json?key=org.onebusaway.iphone&version=2")
@@ -269,20 +269,10 @@ class TodayViewController: UITableViewController, CLLocationManagerDelegate, NCW
                                     stop1_buses = stop1_buses.filter({
                                         $0["predictedArrivalTime"].intValue > currentTime})
                                     stop1_buses.sort({$0["predictedArrivalTime"].intValue < $1["predictedArrivalTime"].intValue})
-
-                                    if stop1_buses.count > 0 {
-                                        //Build the RouteNum by combining Bus Number and Bus Compass direction)
-                                        let busNum = stop1_buses[0]["routeShortName"]
-                                        let busDirection = stops[1]["direction"]
-                                        
-                                        
-                                        self.routeList.append(stop1_buses[0])
-                                        self.routeDirectionList.append(busDirection)
-                                        
-                                        println("C2S1 RouteList count: \(self.routeList.count)")
-                                    }
-
-                    
+                                    
+                                    
+                                    self.nearbyStopTwoBusList = stop1_buses;
+                                    self.nearbyStopTwoList = stops[1];
                     }
                 case 1:
                     
@@ -310,34 +300,8 @@ class TodayViewController: UITableViewController, CLLocationManagerDelegate, NCW
                                 $0["predictedArrivalTime"].intValue > currentTime})
                             stop0_buses.sort({$0["predictedArrivalTime"].intValue < $1["predictedArrivalTime"].intValue})
                             
-                            if stop0_buses.count > 0 {
-                                //we pick the first bus that is predicted to arrive AFTER current time
-                                var i: Int = 0
-                                var i_arrival: Int = stop0_buses[i]["predictedArrivalTime"].intValue
-                                while  i_arrival < currentTime {
-                                    i = i+1
-                                    if i == stop0_buses.count {
-                                        return
-                                    }
-                                    i_arrival = stop0_buses[i]["predictedArrivalTime"].intValue
-                                }
-                            
-                                //Build the RouteNum by combining Bus Number and Bus Compass direction)
-                                let busNum = stop0_buses[0]["routeShortName"]
-                                let busDirection = stops[0]["direction"]
-                                self.routeList.append(stop0_buses[0])
-                                self.routeDirectionList.append(busDirection)
-                                println("C1B0 RouteList count: \(self.routeList.count)")
-                                if stop0_buses.count > 1
-                                {
-                                //Build the RouteNum by combining Bus Number and Bus Compass direction)
-                                let bus2Num = stop0_buses[1]["routeShortName"]
-                                self.routeList.append(stop0_buses[1])
-                                self.routeDirectionList.append(busDirection)
-                                println("C1B1 RouteList count: \(self.routeList.count)")
-                                }
-
-                            }
+                            self.nearbyStopOneBusList = stop0_buses;
+                            self.nearbyStopOneList = stops[0];
                     }
                 case 0:
                     println("Case 0")
@@ -353,14 +317,25 @@ class TodayViewController: UITableViewController, CLLocationManagerDelegate, NCW
     
     // MARK: UITableViewDataSource
     
-    override func numberOfSectionsInTableView(_ tableView: UITableView) -> Int {
-        return 2
+    override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+        //return min(nearbyStopTwoBusList.count > 0 ? 1 : 0 + nearbyStopOneBusList.count > 0 ? 1 : 0 + favoriteList.count > 0 ? 1 : 0,1)
+        return 3
+
     }
     override func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         switch section {
+        case 2: //nearby Routes
+            if nearbyStopTwoBusList.count > 0  {
+                let stopName = nearbyStopTwoList["name"]
+                return "\(stopName)"
+            }
+            else {
+                return ""
+            }
         case 1: //nearby Routes
-            if routeList.count > 0  {
-                return NSLocalizedString("Nearby Routes", comment: "")
+            if nearbyStopOneBusList.count > 0  {
+                let stopName = nearbyStopOneList["name"]
+                return "\(stopName)"
             }
             else {
                 return ""
@@ -384,11 +359,17 @@ class TodayViewController: UITableViewController, CLLocationManagerDelegate, NCW
     }
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         switch section {
-        case 1: //nearby Routes
-            if routeList.count < 1 {
-                return 1
+        case 2: //nearby Routes 2
+            if nearbyStopTwoBusList.count < 1 {
+                return 0
             }
-            return min(routeList.count, TableViewConstants.baseRowCount + 1)
+            return min(nearbyStopTwoBusList.count, TableViewConstants.maxRowCount - favoriteList.count - tableView.numberOfRowsInSection(1))
+            
+        case 1: //nearby Routes 1
+            if nearbyStopOneBusList.count < 1 {
+                return 0
+            }
+            return min(nearbyStopOneBusList.count, TableViewConstants.maxRowCount - favoriteList.count)
         case 0: //favorite Routes
             return favoriteList.count
         default:
@@ -401,16 +382,16 @@ class TodayViewController: UITableViewController, CLLocationManagerDelegate, NCW
     }
     
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        if routeList.count  > 0 || (favoriteList.count > 0 && indexPath.section == 0){
+        if nearbyStopOneBusList.count  > 0 || nearbyStopTwoBusList.count  > 0 || (favoriteList.count > 0 && indexPath.section == 0){
             
             let cell = tableView.dequeueReusableCellWithIdentifier(TableViewConstants.CellIdentifiers.content, forIndexPath: indexPath) as busViewCell
-            if indexPath.section == 1 {
-                configureBusItemCell(cell, busJSON: routeList[indexPath.row], busDirection: routeDirectionList[indexPath.row])
-                tableView.headerViewForSection(indexPath.section)?.textLabel.text = "Nearby Routes"
+            if indexPath.section == 2 {
+                configureBusItemCell(cell, busJSON: nearbyStopTwoBusList[indexPath.row], busStopJSON: nearbyStopTwoList)
+            }else if indexPath.section == 1 {
+                configureBusItemCell(cell, busJSON: nearbyStopOneBusList[indexPath.row], busStopJSON: nearbyStopOneList)
             }
             else {
-                configureBusItemCell(cell, busJSON: favoriteList[indexPath.row], busDirection: favoriteDirectionList[indexPath.row])
-                tableView.headerViewForSection(indexPath.section)?.textLabel.text = "Favorite Route"
+                configureBusItemCell(cell, busJSON: favoriteList[indexPath.row], busStopJSON: favoriteStopList[indexPath.row])
             }
             cell.textLabel.text = ""
             return cell
@@ -428,7 +409,8 @@ class TodayViewController: UITableViewController, CLLocationManagerDelegate, NCW
         }
     }
     
-    func configureBusItemCell(itemCell: busViewCell, busJSON: SwiftyJSON.JSON, busDirection: SwiftyJSON.JSON) {
+    func configureBusItemCell(itemCell: busViewCell, busJSON: SwiftyJSON.JSON, busStopJSON: SwiftyJSON.JSON) {
+        let busDirection = busStopJSON["direction"]
         let busNum = busJSON["routeShortName"]
         let busHeadsign = busJSON["tripHeadsign"]
         
