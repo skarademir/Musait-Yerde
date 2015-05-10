@@ -353,7 +353,7 @@ class TodayViewController: UITableViewController, CLLocationManagerDelegate, NCW
     }
     override func tableView(tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
         view.tintColor = UIColor.clearColor()
-        var header = view as UITableViewHeaderFooterView
+        var header = view as! UITableViewHeaderFooterView
         header.textLabel.textColor = UIColor.whiteColor()
         header.textLabel.font = UIFont(name: "Helventica Neue", size: 11)
     }
@@ -384,7 +384,7 @@ class TodayViewController: UITableViewController, CLLocationManagerDelegate, NCW
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         if nearbyStopOneBusList.count  > 0 || nearbyStopTwoBusList.count  > 0 || (favoriteList.count > 0 && indexPath.section == 0){
             
-            let cell = tableView.dequeueReusableCellWithIdentifier(TableViewConstants.CellIdentifiers.content, forIndexPath: indexPath) as busViewCell
+            let cell = tableView.dequeueReusableCellWithIdentifier(TableViewConstants.CellIdentifiers.content, forIndexPath: indexPath) as! busViewCell
             if indexPath.section == 2 {
                 configureBusItemCell(cell, busJSON: nearbyStopTwoBusList[indexPath.row], busStopJSON: nearbyStopTwoList)
             }else if indexPath.section == 1 {
@@ -393,18 +393,18 @@ class TodayViewController: UITableViewController, CLLocationManagerDelegate, NCW
             else {
                 configureBusItemCell(cell, busJSON: favoriteList[indexPath.row], busStopJSON: favoriteStopList[indexPath.row])
             }
-            cell.textLabel.text = ""
+            cell.textLabel!.text = ""
             return cell
         }
         else {
-            let cell = tableView.dequeueReusableCellWithIdentifier(TableViewConstants.CellIdentifiers.content, forIndexPath: indexPath) as UITableViewCell
+            let cell = tableView.dequeueReusableCellWithIdentifier(TableViewConstants.CellIdentifiers.content, forIndexPath: indexPath) as! UITableViewCell
             if networkError {
-                cell.textLabel.text = NSLocalizedString("Network Error", comment: "")
+                cell.textLabel!.text = NSLocalizedString("Network Error", comment: "")
             }
             else{
-                cell.textLabel.text = NSLocalizedString("No Nearby buses and running Favorites.", comment: "")
+                cell.textLabel!.text = NSLocalizedString("No Nearby buses and running Favorites.", comment: "")
             }
-            cell.textLabel.textColor = UIColor.lightTextColor()
+            cell.textLabel!.textColor = UIColor.lightTextColor()
             return cell
         }
     }
