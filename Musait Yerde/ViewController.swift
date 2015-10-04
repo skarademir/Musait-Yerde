@@ -11,16 +11,17 @@ import UIKit
 //Crappy picker for preferred bus route picker
 //currently the routes need to be resolved to their
 class ViewController: UIViewController {
+    var sharedDefaults = NSUserDefaults(suiteName: "group.Musait-Yerde")
+    
     @IBOutlet var textField: UITextField!
     @IBAction func setButtonPressed(sender: AnyObject) {
 
-        let sharedDefaults = NSUserDefaults(suiteName: "group.Musait-Yerde")
-        sharedDefaults?.setObject(textField.text!, forKey: "numberPass")
-        sharedDefaults?.synchronize()
-    }
+        }
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
+        sharedDefaults?.setObject("teststring", forKey: "numberPass")
+        
     }
 
     override func didReceiveMemoryWarning() {

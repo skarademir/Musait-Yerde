@@ -29,6 +29,7 @@ class TodayViewController: UITableViewController, CLLocationManagerDelegate, NCW
     }
 
     let locationManager = CLLocationManager()
+    var sharedDefaults = NSUserDefaults(suiteName: "group.Musait-Yerde")
     
     var favoriteList: Array<SwiftyJSON.JSON> = []{
         didSet {
@@ -44,7 +45,7 @@ class TodayViewController: UITableViewController, CLLocationManagerDelegate, NCW
                 resetContentSize()
         }
     }
-    var nearbyStopOneList: SwiftyJSON.JSON = SwiftyJSON.JSON.nullJSON;
+    var nearbyStopOneList: SwiftyJSON.JSON = SwiftyJSON.JSON.null;
     
     var nearbyStopTwoBusList : Array<SwiftyJSON.JSON> = []{
         didSet {
@@ -52,7 +53,7 @@ class TodayViewController: UITableViewController, CLLocationManagerDelegate, NCW
             resetContentSize()
         }
     }
-    var nearbyStopTwoList: SwiftyJSON.JSON = SwiftyJSON.JSON.nullJSON;
+    var nearbyStopTwoList: SwiftyJSON.JSON = SwiftyJSON.JSON.null;
     
     var networkError: Bool = false
     
@@ -79,17 +80,19 @@ class TodayViewController: UITableViewController, CLLocationManagerDelegate, NCW
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        sharedDefaults?.synchronize()
         
                //init location manager delegate and request A8uthoriization from user
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBestForNavigation
         locationManager.requestWhenInUseAuthorization()
         locationManager.pausesLocationUpdatesAutomatically = true
-        
+        var favoriteStop_PM  = [FavoriteRouteStop(stopId: "1_71335",routeId: "40_100236"),FavoriteRouteStop(stopId: "1_71335",routeId: "40_100511"),FavoriteRouteStop(stopId: "1_10914",routeId: "1_100447")]
         //use SharedDefaults to build the Favorite Stop Routes to display
-        let sharedDefaults = NSUserDefaults(suiteName: "group.Musait-Yerde")
-        
-        //favStopId = sharedDefaults!.objectForKey("numberPass") as String
+//        if let SD_favStopId = sharedDefaults!.setObject(<#value: AnyObject?#>, forKey: <#String#>)("numberPass")
+//        {
+//            println(SD_favStopId)
+//        }
         //sharedDefaults.
         var favStopId: String = "1_13460"
         var favRouteId: String = "40_100236"
@@ -97,17 +100,13 @@ class TodayViewController: UITableViewController, CLLocationManagerDelegate, NCW
         //two ways to determine if its AM or PM
         //Method One: extract hour as integer using NSDateComponents
         let calendar = NSCalendar.currentCalendar()
-        let components = calendar.components (NSCalendarUnit.CalendarUnitHour, fromDate: now)
-        let hour = components.hour
-        if hour < 12 { // Morning
+        let components = calendar.components (NSCalendarUnit.Hour, fromDate: now)
+        let hour = components.hour //24h
+        if hour < 12 { // Morning (any time before 12pm)
             var favoriteStop_AM = FavoriteRouteStop(stopId: favStopId,routeId: favRouteId)
             updateFavStop([favoriteStop_AM])
-        } else {
-            //var favoriteStop_PM
-            
-            
+        } else { // Evening
             updateFavStop([FavoriteRouteStop(stopId: "1_71335",routeId: "40_100236"),FavoriteRouteStop(stopId: "1_71335",routeId: "40_100511"),FavoriteRouteStop(stopId: "1_10914",routeId: "1_100447")])
-            //updateFavStop([FavoriteRouteStop(stopId: "1_71334",routeId: "40_100236")]) //ahmet
         }
         //Method Two: Build an string using NSDateFormatter and compare that against "AM"
         //Should be slower. But i need to bench first
@@ -129,32 +128,36 @@ class TodayViewController: UITableViewController, CLLocationManagerDelegate, NCW
         for favoriteRouteStop in favoriteRouteStops {
 
         Alamofire.request(.GET, "http://api.pugetsound.onebusaway.org/api/where/arrivals-and-departures-for-stop/\(favoriteRouteStop.stopId).json?key=org.onebusaway.iphone&version=2")
-            .responseJSON { (_, _, data, error) in
-                var responseJSON: SwiftyJSON.JSON
-                if error != nil {
+            .responseJSON { response in
+                var responseJSON: SwiftyJSON.JSON = SwiftyJSON.JSON.null
+
+                switch response.result {
+                case .Success:
+                    print("Validation Successful")
+                    if (response.result.value != nil) {
+                        responseJSON = SwiftyJSON.JSON(response.result.value!)
+                    }
+                case .Failure(let error):
+                    debugPrint(error)
                     self.networkError = true
-                    responseJSON = SwiftyJSON.JSON.nullJSON
-                } else if data != nil {
-                    responseJSON = SwiftyJSON.JSON(data!)
-                } else {
-                    responseJSON = SwiftyJSON.JSON.nullJSON
+                    return
                 }
-                //println("\(responseJSON)")
+                
                 var favstop_buses: Array<JSON> = responseJSON["data"]["entry"]["arrivalsAndDepartures"].arrayValue
                 //println("\(favstop_buses)")
                 
                 let currentTime: Int = responseJSON["currentTime"].intValue
                 
                 favstop_buses = favstop_buses.filter({
-                    var didntArriveYet: Bool = $0["predictedArrivalTime"].intValue > currentTime;
-                    var onFavRoute: Bool = $0["routeId"].stringValue == favoriteRouteStop.routeId;
-                    println ("\(didntArriveYet && onFavRoute)");
+                    let didntArriveYet: Bool = $0["predictedArrivalTime"].intValue > currentTime;
+                    let onFavRoute: Bool = $0["routeId"].stringValue == favoriteRouteStop.routeId;
+                    print ("\(didntArriveYet && onFavRoute)");
                     return didntArriveYet && onFavRoute })
-                favstop_buses.sort({$0["predictedArrivalTime"].intValue < $1["predictedArrivalTime"].intValue})
+                favstop_buses.sortInPlace({$0["predictedArrivalTime"].intValue < $1["predictedArrivalTime"].intValue})
                 if favstop_buses.count > 0 {
                     //Build the RouteNum by combining Bus Number and Bus Compass direction)
                     self.favoriteList.append(favstop_buses[0])
-                    let busDirection = responseJSON["data"]["references"]["stops"][0]["direction"]
+                    //let busDirection = responseJSON["data"]["references"]["stops"][0]["direction"]
                     self.favoriteStopList.append(responseJSON["data"]["references"]["stops"][0])
                 }
             }     
@@ -188,87 +191,90 @@ class TodayViewController: UITableViewController, CLLocationManagerDelegate, NCW
         completionHandler(NCUpdateResult.NewData)
     }
     // MARK: CLLocationManagerDelegate
-    func locationManager(manager:CLLocationManager, didUpdateLocations locations:[AnyObject]) {
-        
+    func locationManager(manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         //stop polling for locations after first time (don't expect hte user to move particularly far before closing the today widget) TODO
         locationManager.stopUpdatingLocation()
 
         
         //println("locations = \(locations)")
-        var latValue = locationManager.location.coordinate.latitude
-        var lonValue = locationManager.location.coordinate.longitude
-        println("\(latValue)")
-        println("\(lonValue)")
+        let latValue = locationManager.location!.coordinate.latitude
+        let lonValue = locationManager.location!.coordinate.longitude
+        print("\(latValue)")
+        print("\(lonValue)")
         
         Alamofire.request(.GET, "http://api.pugetsound.onebusaway.org/api/where/stops-for-location.json?key=org.onebusaway.iphone&app_uid=1EC3E57A-B013-40CC-A495-4F0A3CB2FC79&app_ver=2.2.1&lat=\(latValue)&lon=\(lonValue)&latSpan=0.002960&lonSpan=0.004426&version=2")
-            .responseJSON { (_, _, data, error) in
-                var responseJSON: SwiftyJSON.JSON
-                if error != nil {
-                    self.networkError = true;
-                    responseJSON = SwiftyJSON.JSON.nullJSON
-                    //println("nullJSON")
-                    //println("\(error)")
-                } else if data != nil {
-                    responseJSON = SwiftyJSON.JSON(data!)
-                    //println("JSON")
-                } else {
-                    responseJSON = SwiftyJSON.JSON.nullJSON
-                    //println("nullJSONelse")
-                }
+            .responseJSON { response in
+                var responseJSON: SwiftyJSON.JSON = SwiftyJSON.JSON.null
                 
-                //println("\(responseJSON)")
+                switch response.result {
+                case .Success:
+                    print("Validation Successful")
+                    if (response.result.value != nil) {
+                        responseJSON = SwiftyJSON.JSON(response.result.value!)
+                    }
+                case .Failure(let error):
+                    debugPrint(error)
+                    self.networkError = true
+                    return
+                }
                 
                 let stops: Array<JSON> = responseJSON["data"]["list"].arrayValue
                 
-                println("stops count = \(stops.count)")
+                print("stops count = \(stops.count)")
                 switch stops.count {
-                case 2...Int.max:
+                case 2..<Int.max:
                     //println("Case 2")
                     let stop0_id: SwiftyJSON.JSON = stops[0]["id"]
                     let stop1_id: SwiftyJSON.JSON = stops[1]["id"]
 
                     Alamofire.request(.GET, "http://api.pugetsound.onebusaway.org/api/where/arrivals-and-departures-for-stop/\(stop0_id).json?key=org.onebusaway.iphone&version=2")
-                        .responseJSON { (_, _, data, error) in
-                            var responseJSON: SwiftyJSON.JSON
-                            if error != nil {
-                                
-                                self.networkError = true;
-                                responseJSON = SwiftyJSON.JSON.nullJSON
-                            } else if data != nil {
-                                responseJSON = SwiftyJSON.JSON(data!)
-                            } else {
-                                responseJSON = SwiftyJSON.JSON.nullJSON
+                        .responseJSON { response in
+                            var responseJSON: SwiftyJSON.JSON = SwiftyJSON.JSON.null
+                            
+                            switch response.result {
+                            case .Success:
+                                print("Validation Successful")
+                                if (response.result.value != nil) {
+                                    responseJSON = SwiftyJSON.JSON(response.result.value!)
+                                }
+                            case .Failure(let error):
+                                debugPrint(error)
+                                self.networkError = true
+                                return
                             }
-                            //println("\(responseJSON)")
+                            
                             var stop0_buses: Array<JSON> = responseJSON["data"]["entry"]["arrivalsAndDepartures"].arrayValue
                             let currentTime: Int = responseJSON["currentTime"].intValue
 
                             stop0_buses = stop0_buses.filter({
                                 $0["predictedArrivalTime"].intValue > currentTime})
-                            stop0_buses.sort({$0["predictedArrivalTime"].intValue < $1["predictedArrivalTime"].intValue})
+                            stop0_buses.sortInPlace({$0["predictedArrivalTime"].intValue < $1["predictedArrivalTime"].intValue})
                             self.nearbyStopOneBusList = stop0_buses;
                             self.nearbyStopOneList = stops[0];
                     }
                             //println("\(stop1_id)")
                             Alamofire.request(.GET, "http://api.pugetsound.onebusaway.org/api/where/arrivals-and-departures-for-stop/\(stop1_id).json?key=org.onebusaway.iphone&version=2")
-                                .responseJSON { (_, _, data, error) in
-                                    var responseJSON: SwiftyJSON.JSON
-                                    if error != nil {
-                                        
-                                        self.networkError = true;
-                                        responseJSON = SwiftyJSON.JSON.nullJSON
-                                    } else if data != nil {
-                                        responseJSON = SwiftyJSON.JSON(data!)
-                                    } else {
-                                        responseJSON = SwiftyJSON.JSON.nullJSON
+                                .responseJSON { response in
+                                    var responseJSON: SwiftyJSON.JSON = SwiftyJSON.JSON.null
+                                    
+                                    switch response.result {
+                                    case .Success:
+                                        print("Validation Successful")
+                                        if (response.result.value != nil) {
+                                            responseJSON = SwiftyJSON.JSON(response.result.value!)
+                                        }
+                                    case .Failure(let error):
+                                        debugPrint(error)
+                                        self.networkError = true
+                                        return
                                     }
-                                    //println("\(responseJSON)")
+                                    
                                     var stop1_buses: Array<JSON> = responseJSON["data"]["entry"]["arrivalsAndDepartures"].arrayValue
                                     let currentTime: Int = responseJSON["currentTime"].intValue
 
                                     stop1_buses = stop1_buses.filter({
                                         $0["predictedArrivalTime"].intValue > currentTime})
-                                    stop1_buses.sort({$0["predictedArrivalTime"].intValue < $1["predictedArrivalTime"].intValue})
+                                    stop1_buses.sortInPlace({$0["predictedArrivalTime"].intValue < $1["predictedArrivalTime"].intValue})
                                     
                                     
                                     self.nearbyStopTwoBusList = stop1_buses;
@@ -280,34 +286,37 @@ class TodayViewController: UITableViewController, CLLocationManagerDelegate, NCW
                     let stop0_id: SwiftyJSON.JSON = stops[0]["id"]
                     //println("\(stop0_id)")
                     Alamofire.request(.GET, "http://api.pugetsound.onebusaway.org/api/where/arrivals-and-departures-for-stop/\(stop0_id).json?key=org.onebusaway.iphone&version=2")
-                        .responseJSON { (_, _, data, error) in
-                            var responseJSON: SwiftyJSON.JSON
-                            if error != nil {
-                                
-                                self.networkError = true;
-                                responseJSON = SwiftyJSON.JSON.nullJSON
-                            } else if data != nil {
-                                responseJSON = SwiftyJSON.JSON(data!)
-                            } else {
-                                responseJSON = SwiftyJSON.JSON.nullJSON
+                        .responseJSON { response in
+                            var responseJSON: SwiftyJSON.JSON = SwiftyJSON.JSON.null
+                            
+                            switch response.result {
+                            case .Success:
+                                print("Validation Successful")
+                                if (response.result.value != nil) {
+                                    responseJSON = SwiftyJSON.JSON(response.result.value!)
+                                }
+                            case .Failure(let error):
+                                debugPrint(error)
+                                self.networkError = true
+                                return
                             }
-                            //println("\(responseJSON)")
+                            
                             var stop0_buses: Array<JSON> = responseJSON["data"]["entry"]["arrivalsAndDepartures"].arrayValue
                             
                             let currentTime: Int = responseJSON["currentTime"].intValue
 
                             stop0_buses = stop0_buses.filter({
                                 $0["predictedArrivalTime"].intValue > currentTime})
-                            stop0_buses.sort({$0["predictedArrivalTime"].intValue < $1["predictedArrivalTime"].intValue})
+                            stop0_buses.sortInPlace({$0["predictedArrivalTime"].intValue < $1["predictedArrivalTime"].intValue})
                             
                             self.nearbyStopOneBusList = stop0_buses;
                             self.nearbyStopOneList = stops[0];
                     }
                 case 0:
-                    println("Case 0")
+                    print("Case 0")
                 default:
                     
-                    println("Case Default")
+                    print("Case Default")
                 }
                 
                 
@@ -353,9 +362,9 @@ class TodayViewController: UITableViewController, CLLocationManagerDelegate, NCW
     }
     override func tableView(tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
         view.tintColor = UIColor.clearColor()
-        var header = view as! UITableViewHeaderFooterView
-        header.textLabel.textColor = UIColor.whiteColor()
-        header.textLabel.font = UIFont(name: "Helventica Neue", size: 11)
+        let header = view as! UITableViewHeaderFooterView
+        header.textLabel!.textColor = UIColor.whiteColor()
+        header.textLabel!.font = UIFont(name: "Helventica Neue", size: 11)
     }
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         switch section {
@@ -397,7 +406,7 @@ class TodayViewController: UITableViewController, CLLocationManagerDelegate, NCW
             return cell
         }
         else {
-            let cell = tableView.dequeueReusableCellWithIdentifier(TableViewConstants.CellIdentifiers.content, forIndexPath: indexPath) as! UITableViewCell
+            let cell = tableView.dequeueReusableCellWithIdentifier(TableViewConstants.CellIdentifiers.content, forIndexPath: indexPath) 
             if networkError {
                 cell.textLabel!.text = NSLocalizedString("Network Error", comment: "")
             }
